@@ -15,7 +15,7 @@ prototol_list_prisma = {
     'LEOPOLD_SHIVA'
     'MINO_AMN'
     'PPMI2_0'
-    'PROSPAX'
+%     'PROSPAX'
     'PULSE'
     'TRIAL_21'
     };
@@ -67,7 +67,7 @@ data(skip) = [];
 %% Fetch exam path
 
 for p = 1 : length(data)
-    data(p).exam = gdir(data(p).path,'^202');
+    data(p).exam = gdir(data(p).path,'^20');
     data(p).exam = remove_regexi(data(p).exam, 'pilot(e)?|phantom(e)?|test(e)?|fantom(e)?');
     data(p).exam = fullfile(data(p).exam, 'SCANS');
 end

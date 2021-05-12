@@ -16,7 +16,7 @@ seq_of_interest = {
 %% main loop
 
 allseq = {};
-for p = 1%1 : length(data)
+for p = 1 : length(data)
     
     for e = 1 : length(data(p).content) % each exam
         
@@ -49,11 +49,12 @@ for p = 1%1 : length(data)
             end
             allseq{end+1} = seq;
             
+            
             %% 1 table per exam
             
             if contains(seq, seq_of_interest)
                 
-                if contains(seq, 'diff')
+                if contains(seq, {'diff','resolve'} )
                     
                     % special case : DWI: keep only magnitude (original)
                     if ~isfield(content,'DiffusionScheme')
@@ -63,6 +64,10 @@ for p = 1%1 : length(data)
                     end
                     
                 end
+                
+                
+                %% TODO : eleminate bold non primary (MOCO)
+                %%
                 
                 counter = counter + 1;
                 
@@ -84,6 +89,19 @@ for p = 1%1 : length(data)
             
         else
             
+            % Sort
+            all_series_desc = {info.SeriesDescription};
+            [~,order] = sort(all_series_desc);
+            info = info(order);
+            
+            % Keep only unique
+            all_param = cell(size(info));
+            for idx = 1 : length(info)
+                all_param{idx} = str2char(info(idx));
+            end
+            [~,idx2unique] = unique(all_param,'stable');
+            info = info(idx2unique);
+            
             data(p).info_struct{e} = info;
             data(p).info_table {e} = struct2table( info );
             data(p).info_char  {e} = structarray2char( info );
@@ -104,9 +122,10 @@ for p = 1%1 : length(data)
     
     %% Regroup
     
-    [C,IA,IC] =  unique( data(p).info_char );
-    %     C'
-        data(p).info_table{IA}
+    [~,idx2group,group2idx] =  unique( data(p).info_char );
+    
+    data(p).info_table{idx2group}
+    cell2table([data(p).exam num2cell(group2idx)])
     
 end
 
