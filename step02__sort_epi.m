@@ -1,9 +1,7 @@
-clearvars -except data
+clear
 clc
 
-if ~exist('data','var')
-    load data
-end
+load data
 
 seq_of_interest = {
     '_cmrr_mbep2d_bold'
@@ -15,11 +13,10 @@ seq_of_interest = {
     };
 
 
+%% main loop
+
 allseq = {};
-for p = 1 : length(data)
-    
-    info = cell(0,3);
-    counter = 0;
+for p = 1%1 : length(data)
     
     for e = 1 : length(data(p).content) % each exam
         
@@ -27,13 +24,16 @@ for p = 1 : length(data)
             data(p).operator{e} = data(p).content{e}{1}.Operator;
         end
         
-        info = cell(0,3);
+        info = struct('SeriesDescription','', 'SequenceName','', 'PhaseEncodingDirection','');
         counter = 0;
         
         for s = 1 : length(data(p).content{e}) % each serie
             %% shortcut
             
             content = data(p).content{e}{s};
+            if isnumeric(content) && isnan(content)
+                continue
+            end
             
             
             %% get seq name
@@ -53,30 +53,60 @@ for p = 1 : length(data)
             
             if contains(seq, seq_of_interest)
                 
-                % special case : DWI: keep only magnitude (original)
-                if ~isfield(content,'DiffusionScheme')
-                    continue
-                elseif isfield(content,'RawImage') && content.RawImage==0
-                    continue
+                if contains(seq, 'diff')
+                    
+                    % special case : DWI: keep only magnitude (original)
+                    if ~isfield(content,'DiffusionScheme')
+                        continue
+                    elseif isfield(content,'RawImage') && content.RawImage==0
+                        continue
+                    end
+                    
                 end
                 
                 counter = counter + 1;
                 
-                info{counter,1} = content.SeriesDescription;
-                info{counter,2} = seq;
-                info{counter,3} = ijk_to_APRLIF( content.PhaseEncodingDirection );
+                info(counter).SeriesDescription = content.SeriesDescription;
+                info(counter).SequenceName = seq;
+                info(counter).PhaseEncodingDirection = ijk_to_APRLIF( content.PhaseEncodingDirection );
                 
             end
             
             
         end % serie
         
-        if ~isempty(info)
-            info = cell2table(info,'VariableNames',{'SeriesDescription','SequenceName','PhaseEncodingDirection'});
-            data(p).info{e} = info;
+        
+        if isempty( info(1).SeriesDescription )
+           
+            data(p).info_struct{e} = [];
+            data(p).info_table {e} = [];
+            data(p).info_char  {e} = [];
+            
+        else
+            
+            data(p).info_struct{e} = info;
+            data(p).info_table {e} = struct2table( info );
+            data(p).info_char  {e} = structarray2char( info );
+            
         end
         
+        
     end % exam
+    
+    
+    %% Eliminate exam without seq_of_interest
+    
+    no_seq_of_interest = cellfun('isempty',data(p).info_struct');
+    fields_ = {'exam', 'serie', 'json_dcm2niix', 'json_dcmstack', 'operator', 'content', 'info_struct', 'info_char', 'info_table'};
+    for f = fields_
+        data(p).(char(f))(no_seq_of_interest) = [];
+    end
+    
+    %% Regroup
+    
+    [C,IA,IC] =  unique( data(p).info_char );
+    %     C'
+        data(p).info_table{IA}
     
 end
 

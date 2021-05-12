@@ -25,7 +25,7 @@ prototol_list_verio = {
     'STOP_I_SEP'
     'AFFINITY'
     'PASADENA'
-    'FAIRPARK_II'
+%     'FAIRPARK_II'
     'QUIT_COC'
     'GRADUATION'
     'PADOVA'
@@ -67,7 +67,8 @@ data(skip) = [];
 %% Fetch exam path
 
 for p = 1 : length(data)
-    data(p).exam = gdir(data(p).path,'^2021*');
+    data(p).exam = gdir(data(p).path,'^202');
+    data(p).exam = remove_regexi(data(p).exam, 'pilot(e)?|phantom(e)?|test(e)?|fantom(e)?');
     data(p).exam = fullfile(data(p).exam, 'SCANS');
 end
 
