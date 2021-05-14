@@ -128,13 +128,40 @@ for p = 1 : length(data)
         data(p).(char(f))(no_seq_of_interest) = [];
     end
     
+    
     %% Regroup
     
     [~,idx2group,group2idx] =  unique( data(p).info_char );
     
-    data(p).info_table{idx2group}
-    cell2table([data(p).exam num2cell(group2idx)])
     
+    %% Display
+    
+    fprintf('=============================================================================================================================\n')
+    fprintf('protocol : %s \n', data(p).name)
+    fprintf('=============================================================================================================================\n')
+    
+    %     data(p).info_table{idx2group}
+    %     cell2table([data(p).exam num2cell(group2idx)])
+    
+    [~,order] = sort(histcounts(group2idx),'descend'); % this is the order of groups where there is the more exam
+    
+    fprintf('\n')
+    
+    for o = 1 : length(order)
+        
+        bin = order(o)==group2idx;
+        fprintf('N = %d \n', sum(bin));
+        
+        disp(data(p).info_table{find(bin,1,'first')})
+        t = cell2table([data(p).exam(bin) data(p).operator(bin)']);
+        t.Properties.VariableNames = {'exam','operator'};
+        disp(t)
+        
+        fprintf('\n')
+        fprintf('-------------------------------------------------------------------------------------------------------------------\n')
+    end
+    
+    fprintf('\n\n\n')
     
 end
 
