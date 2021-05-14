@@ -68,7 +68,7 @@ for p = 1 : length(data)
                 elseif contains(seq, 'bold' )
                     
                     % special case : for BOLD, eliminate series that comes from online stats analysis
-                    if contains('MOCO', content.ImageType)
+                    if any(strcmp('MOCO', content.ImageType))
                         continue
                     elseif contains('DERIVED', content.ImageType)
                         continue
@@ -150,7 +150,7 @@ for p = 1 : length(data)
     for o = 1 : length(order)
         
         bin = order(o)==group2idx;
-        fprintf('N = %d \n', sum(bin));
+        fprintf('N = %d/%d (%d%%) \n', sum(bin), length(bin), round(100*sum(bin)/length(bin)));
         
         disp(data(p).info_table{find(bin,1,'first')})
         t = cell2table([data(p).exam(bin) data(p).operator(bin)']);
