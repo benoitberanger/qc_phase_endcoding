@@ -1,7 +1,9 @@
-clear
+clearvars -except data
 clc
 
-load data
+if ~exist('data','var')
+    load data
+end
 
 seq_of_interest = {
     '_cmrr_mbep2d_bold'
@@ -63,11 +65,17 @@ for p = 1 : length(data)
                         continue
                     end
                     
+                elseif contains(seq, 'bold' )
+                    
+                    % special case : for BOLD, eliminate series that comes from online stats analysis
+                    if contains('MOCO', content.ImageType)
+                        continue
+                    elseif contains('DERIVED', content.ImageType)
+                        continue
+                        
+                    end
+                    
                 end
-                
-                
-                %% TODO : eleminate bold non primary (MOCO)
-                %%
                 
                 counter = counter + 1;
                 
@@ -82,7 +90,7 @@ for p = 1 : length(data)
         
         
         if isempty( info(1).SeriesDescription )
-           
+            
             data(p).info_struct{e} = [];
             data(p).info_table {e} = [];
             data(p).info_char  {e} = [];
@@ -127,11 +135,8 @@ for p = 1 : length(data)
     data(p).info_table{idx2group}
     cell2table([data(p).exam num2cell(group2idx)])
     
+    
 end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% target
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % all seq name

@@ -16,7 +16,7 @@ prototol_list_prisma = {
     'MINO_AMN'
     'PPMI2_0'
 %     'PROSPAX'
-    'PULSE'
+%     'PULSE'
     'TRIAL_21'
     };
 
