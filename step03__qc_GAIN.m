@@ -10,6 +10,8 @@ seq_of_interest = {
     '_gre_field_map'
     };
 
+show_operator = 0;
+
 
 %% main loop
 
@@ -17,8 +19,10 @@ allseq = {};
 
 for e = 1 : length(data.content) % each exam
     
-    if isfield(data.content{e}{1},'Operator')
-        data.operator{e} = data.content{e}{1}.Operator;
+    if show_operator
+        if isfield(data.content{e}{1},'Operator')
+            data.operator{e} = data.content{e}{1}.Operator;
+        end
     end
     
     info = struct('SeriesDescription','', 'SequenceName','', 'PhaseEncodingDirection','', 'Type', '');
@@ -149,8 +153,13 @@ for o = 1 : length(order)
     fprintf('N = %d/%d (%d%%) \n', sum(bin), length(bin), round(100*sum(bin)/length(bin)));
     
     disp(data.info_table{find(bin,1,'first')})
-    t = cell2table([data.exam(bin) data.operator(bin)']);
-    t.Properties.VariableNames = {'exam','operator'};
+    if show_operator
+        t = cell2table([data.exam(bin) data.operator(bin)']);
+        t.Properties.VariableNames = {'exam','operator'};
+    else
+        t = cell2table(data.exam(bin));
+        t.Properties.VariableNames = {'exam'};
+    end
     disp(t)
     
     fprintf('\n')
